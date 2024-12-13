@@ -76,6 +76,14 @@ In particular, most modern VQA models use a vision backbone (e.g. ResNet, ViT) a
 
 ### Architecture
 
+#### Vision Encoder: ViT
+***Vision Transformer*** (**ViT**) is a vision model, designed to apply the Transformer (first introduced for language tasks) to computer vision tasks. ViT directly applies the Transformer onto patches of an image, completely replacing the convolutional layers traditionally used in computer vision models (e.g. ResNet). A key benefit of ViT is its scalability - although it performs worse compared to previous models (e.g. ResNet) on small datasets, its computational efficiency allows it to outscale and outperform other major models on large datasets.
+
+#### Text Encoder - BERT
+***Bidirectional Encoder Representations from Transformers*** (**BERT**) is a language representation model architecture designed to be easily applicable (with minimal adjustment and finetuning) as a pretrained model for a variety of downstream language tasks. Compared to previous language models based on unidirectional attention (e.g. GPT), BERT uses a bidirectional Transformer encoder and is pretrained on two unsupervised tasks (Next Sentence Prediction/NSP and a “Masked LM” task). 
+
+#### Language Model: GPT-2
+
 ### Code
 
 ### Performance
