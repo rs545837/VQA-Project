@@ -285,8 +285,8 @@ class ImageAugmentation:
     def __jpeg_compression_transform(self):
         c = [25, 18, 15, 10, 7][self.factor - 1]
         x = np.array(self.image)
-        cv2.imwrite("parrot_saved.jpg", x, [int(cv2.IMWRITE_JPEG_QUALITY), c]) 
-        temp = imread("parrot_saved.jpg")
+        cv2.imwrite("temp.jpg", x, [int(cv2.IMWRITE_JPEG_QUALITY), c]) 
+        temp = imread("temp.jpg")
         return temp
 
     def addDigital(self):
