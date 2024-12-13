@@ -13,7 +13,7 @@
     - [Benchmarks](#benchmarks)
     - [Augmented VQA](#augmented-vqa)
     - [Wu-Palmer Similarity](#wu-palmer-similarity)
-  - [Our Finetuned model](#our-finetuned-model)
+  - [Basic Implementation Of VLM](#basic-implementation-of-vlm)
     - [Motivation](#motivation)
     - [Architecture](#architecture)
     - [Code](#code)
@@ -134,7 +134,15 @@ Currently, the model is in its basic implementation phase. Preliminary results i
 
 ### Code
 
+### Training Curves
+For more training curves check out wandb: https://wandb.ai/music123/huggingface?nw=nwuserrs545837
+<img width="854" alt="Screenshot 2024-12-13 at 10 46 39 PM" src="https://github.com/user-attachments/assets/8adaea19-16fa-41c6-b1d5-defc72401806" />
+
+
 ### Performance
+
+
+
 
 ## Idefic3
 
