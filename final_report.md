@@ -70,7 +70,7 @@ In particular, most modern VQA models use a vision backbone (e.g. ResNet, ViT) a
 
 ### Wu-Palmer Similarity
 
-## Our Finetuned model
+## Basic Implementation of VLM
 
 ### Motivation
 
