@@ -76,13 +76,61 @@ In particular, most modern VQA models use a vision backbone (e.g. ResNet, ViT) a
 
 ### Architecture
 
-#### Vision Encoder: ViT
-***Vision Transformer*** (**ViT**) is a vision model, designed to apply the Transformer (first introduced for language tasks) to computer vision tasks. ViT directly applies the Transformer onto patches of an image, completely replacing the convolutional layers traditionally used in computer vision models (e.g. ResNet). A key benefit of ViT is its scalability - although it performs worse compared to previous models (e.g. ResNet) on small datasets, its computational efficiency allows it to outscale and outperform other major models on large datasets.
+#### Vision Encoder
 
-#### Text Encoder - BERT
-***Bidirectional Encoder Representations from Transformers*** (**BERT**) is a language representation model architecture designed to be easily applicable (with minimal adjustment and finetuning) as a pretrained model for a variety of downstream language tasks. Compared to previous language models based on unidirectional attention (e.g. GPT), BERT uses a bidirectional Transformer encoder and is pretrained on two unsupervised tasks (Next Sentence Prediction/NSP and a “Masked LM” task). 
+We utilize Vision Transformer (ViT) as the backbone for image feature extraction. ViT splits images into patches and applies the Transformer architecture directly to these patches, enabling efficient computation and scalability. The encoder outputs a high-dimensional feature vector representing the image.
 
-#### Language Model: GPT-2
+**Model Used**: google/vit-base-patch16-224
+
+#### Text Encoder
+
+For the text encoder, we use BERT (Bidirectional Encoder Representations from Transformers). BERT generates a contextual embedding for the question by considering bidirectional relationships between words.
+
+**Model Used**: bert-base-uncased
+
+#### Multimodal Fusion
+
+A fully connected layer is used to combine the vision and text embeddings. The fused representation enables the decoder to utilize both modalities effectively.
+
+#### Language Decoder
+
+The GPT-2 language model generates the natural language response. The decoder takes the fused multimodal embeddings as input and produces the answer in a token-by-token manner.
+
+**Model Used**: gpt2
+
+#### Implementation Details
+
+The VQA model is implemented in PyTorch using the Transformers library. Key steps:
+
+**Preprocessing**:
+
+Images are resized and converted into tensor format using a feature extractor.
+
+Questions are tokenized into embeddings.
+
+**Forward Pass**:
+
+Vision and text features are extracted using ViT and BERT.
+
+Features are fused using a linear layer.
+
+The fused embeddings are passed into GPT-2 for answer generation.
+
+#### Results
+
+Currently, the model is in its basic implementation phase. Preliminary results indicate that the architecture is functional, with generated answers being syntactically coherent but requiring fine-tuning for better accuracy.
+
+#### Future Work
+
+- **Fine-Tuning**: Train the model on a large-scale VQA dataset for improved performance.
+
+- **Augmented VQA**: Integrate semantic similarity metrics like Wu-Palmer similarity for robust evaluation.
+
+- **Model Optimization**: Experiment with advanced fusion techniques and larger language models.
+
+- **Benchmarks**: Evaluate on standard datasets such as VQA v2 and GQA.
+
+
 
 ### Code
 
