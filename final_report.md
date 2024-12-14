@@ -37,19 +37,19 @@
 
 
 <img src="assets/defaria_vqa.png" alt="de Faria - VQA" />
-Fig: An illustration of the VQA task [de Faria]
+Fig: An illustration of the VQA task [[3](#defaria2023)]
 
 
 As a task, VQA is notable in that it extends existing vision/NLP tasks (e.g. image captioning, textual Q&A) by requiring multi-modal knowledge across two separate domains (image & natural language). Due to the open-endedness of VQA questions, a performant VQA model must have the capabilities to correctly answer a vast array of possible input queries across many different domains. This requires both a deep image understanding (as in image captioning) and a deep textual understanding (as in textual Q&A); however, it additionally requires the ability to combine knowledge across both domains to successfully answer questions. In this sense, VQA represents a “next step forward” in terms of building a compelling and challenging AI task.
 
 <img src="assets/kafle_vqa.png" alt="Kafle - VQA" />
-Fig: Aspects of the VQA task [Kafle]
+Fig: Aspects of the VQA task [[9](#kafle2017)]
 
 
 In particular, a key challenge in VQA is the requirement of common-sense reasoning. For example: to answer questions such as “Does this person have 20/20 vision?” and “Is this person expecting company” (pictured below), a VQA model must be able to both identify and extract the requisite information from relevant aspects of the image, reflecting a deeper notion of image understanding compared to previous image tasks.
 
 <img src="assets/antol_reasoning.png" alt="Antol - Reasoning in VQA" />
-Fig: Reasoning tasks in VQA [Antol]
+Fig: Reasoning tasks in VQA [[2](#antol2015)]
 
 ## VQA
 Most VQA architectures consist of two components -- an ***encoder*** and a ***decoder*** -- that perform the following sequence of steps:
@@ -85,10 +85,10 @@ $$
 \mathbf{F} = f(\mathbf{V}, \mathbf{W}) \in \mathbb{R}^{d'}
 $$
 
-Due to importance of the multimodal fusion step in allowing image and textual knowledge to be combined, choice of fusion method is an important part of designing architectures for VQA. There is a tradeoff between the complexity of feature extraction models and the complexity of the fusion step: a complex set of image and text embeddings may require only a single hidden layer and concatenation for fusion, whereas a simpler set of models for feature extraction may benefit from a more sophisticated fusion layer. [Medium]
+Due to importance of the multimodal fusion step in allowing image and textual knowledge to be combined, choice of fusion method is an important part of designing architectures for VQA. There is a tradeoff between the complexity of feature extraction models and the complexity of the fusion step: a complex set of image and text embeddings may require only a single hidden layer and concatenation for fusion, whereas a simpler set of models for feature extraction may benefit from a more sophisticated fusion layer. [[14](#sahu2022)]
 
 <img src="assets/medium_fusion.png" alt="Multimodal Fusion for VQA" />
-Fig: Aspects of the VQA task [Medium]
+Fig: Aspects of the VQA task [[14](#sahu2022)]
 
 Two common approaches for multimodal fusion are (i) concatenation + linear projection, or (ii) cross-attention.
 
@@ -111,22 +111,22 @@ In order to evaluate the models, we chose 3 datasets that collectively address d
 
 *Specifications*:
 - Contains ~1.1 million questions with ~13 million associated answers based on images from the COCO dataset. 
-- Creates a balanced dataset using the following method: "given an (image, question, answer) triplet (I , Q, A) from the VQA dataset, we ask a human subject to identify an image I′ that is similar to I but results in the answer to the question Q to become A′ (which is different from A)."[[1](#goyal2017)]
+- Creates a balanced dataset using the following method: "given an (image, question, answer) triplet (I , Q, A) from the VQA dataset, we ask a human subject to identify an image I′ that is similar to I but results in the answer to the question Q to become A′ (which is different from A)."[[7](#goyal2017)]
 
 *Examples*:
 ![VQAv2 Examples](./images/vqav2_examples.png)
-Image taken from [[1](#goyal2017)].
+Image taken from [[7](#goyal2017)].
 
 #### OK-VQA
 *Motivation*: Current VQA datasets favor image recognition and simple questions such as counting or identifying colors. However, real-world VQA tasks require reasoning using information from outside the image or question domain. OK-VQA addresses this by creating a dataset that requires reasoning using information from outside the image or question domain.
 
 *Specification*:
 - Contains 14,055 questions with 14,031 answers using images from the COCO dataset. 
-> Answering OK-VQA questions is a challeng- ing task since, in addition to understanding the question and the image, the model needs to: (1) learn what knowledge is necessary to answer the questions, (2) determine what query to do to retrieve the necessary knowledge from an outside source of knowledge, and (3) incorporate the knowledge from its original representation to answer the question.[[2]](#marino2019)
+> Answering OK-VQA questions is a challeng- ing task since, in addition to understanding the question and the image, the model needs to: (1) learn what knowledge is necessary to answer the questions, (2) determine what query to do to retrieve the necessary knowledge from an outside source of knowledge, and (3) incorporate the knowledge from its original representation to answer the question.[[13]](#marino2019)
 
 *Examples*:
 ![OK-VQA Examples](./images/okvqa_examples.png)
-Image taken from [[2](#marino2019)].
+Image taken from [[13]](#marino2019).
 
 #### MATH-VQA
 *Motivation*: This dataset tests the mathematical reasoning ability of a model as compared to an average human. It provides a broad and diverse dataset of questions testing the mathematical reasoning ability of models.
@@ -137,16 +137,16 @@ Image taken from [[2](#marino2019)].
 
 *Examples*:
 ![MATH-VQA Examples](./images/mathvqa_examples.png)
-Image taken from \[[3](#wang2024)\].
+Image taken from \[[17](#wang2024)\].
 
 ### Augmented VQA
-Standard datasets are excellent benchmarks for evaluating baseline performance. However, real-world applications often involve **noisy and distorted visual inputs**, making robustness critical. To address this, we created **A-VQA**, an augmented version of VQAv2 using a variety of augmentation techniques inspired by Ishmam et al. (2024) [[4](#ishmam2024)].
+Standard datasets are excellent benchmarks for evaluating baseline performance. However, real-world applications often involve **noisy and distorted visual inputs**, making robustness critical. To address this, we created **A-VQA**, an augmented version of VQAv2 using a variety of augmentation techniques inspired by Ishmam et al. (2024) [[6](#ishmam2024)].
 
 #### Augmentation Techniques
 ![Augmentation Techniques](./images/augments.png)
-Image taken from [[4](#ishmam2024)].
+Image taken from [[6](#ishmam2024)].
 
-The above image shows the augmentation techniques implemented in Ishmam et al. (2024) [[4](#ishmam2024)]. For our A-VQA dataset, we implemented the following augmentation techniques:
+The above image shows the augmentation techniques implemented in Ishmam et al. (2024) [[6](#ishmam2024)]. For our A-VQA dataset, we implemented the following augmentation techniques:
 
 ##### Noise Augmentation
 1. **Shot Noise**: Also called **Poisson Noise**, this technique adds noise to the image using a Poisson distribution.
@@ -508,7 +508,7 @@ The Idefics3 model was chosen due to its robust performance across diverse bench
 
 ### Architecture
 ![Idefics3 Architecture](./images/idefic_arch.png)
-Image taken from [[5](#laurencon2024)].
+Image taken from [[11](#laurencon2024)].
 
 1. *Vision Encoder*: The model uses the SigLIP-SO400M transformer as the vision encoder. The transformer is an open-source model developed by Google using the CLIP architecture with Sigmoid loss. 
 2. *LLM*: The model uses Llama 3.1 Instruct as the language model. This is a big upgrade from Mistral 7B which is significantly outperformed by Llama 3.1.
@@ -544,7 +544,7 @@ def run_inference(model, processor, image, text_prompt):
 ### Performance
 Here is the performance of Idefics3 on some commonly used benchmarks:
 ![Idefics3 Performance](./images/idefic_perf.png)
-Image taken from [[5](#laurencon2024)].
+Image taken from [[6](#laurencon2024)].
 
 ## LLAVA
 
@@ -555,7 +555,7 @@ LLAVA is another robust, state of the art model capable of open-domain question 
 
 ### Architecture
 ![LLaVA Architecture](./images/llava_arch.png)
-Image taken from [[6](#liu2023)].
+Image taken from [[12](#liu2023)].
 
 1. *Vision Encoder*: This model uses a pre-trained CLIP visual encoder ViT-L/14.
 2. *Language Model*: This model uses Vicuna due to its superior instruction following abilities.
@@ -611,7 +611,7 @@ Credits: https://github.com/haotian-liu/LLaVA/blob/main/
 ## Societal Impact & Applications
 Due to the open-endedness of the VQA task, many potential applications can be readily formulated for VQA models. Broadly speaking, VQA is a task for eliciting visual information from images and visual media more generally; in this sense, any activity that involves interpreting and extracting knowledge from a visual medium can be seen as a specific instance of VQA.
 
-In particular, a key application of VQA (even cited back when the task was first introduced in 2015 [Antol]) lies in interfaces for the visually impaired. Currently, visually impaired users have limited means of accessing and interacting with image-based content online. Although image captioning and similar methods have partially bridged this gap, current interfaces for visually impaired users lack the ability to make open-ended queries regarding images. In the future, VQA models may be able to provide this service and help visually impaired users engage with images and other forms of media online.
+In particular, a key application of VQA (even cited back when the task was first introduced in 2015 [[2]](#antol2015)) lies in interfaces for the visually impaired. Currently, visually impaired users have limited means of accessing and interacting with image-based content online. Although image captioning and similar methods have partially bridged this gap, current interfaces for visually impaired users lack the ability to make open-ended queries regarding images. In the future, VQA models may be able to provide this service and help visually impaired users engage with images and other forms of media online.
 
 
 ## Conclusion
@@ -629,29 +629,39 @@ We began with a simple open-answer VQA framework and introduced advanced models 
 ---
 
 ## References
-<a href="goyal2017"></a>[1] Goyal, Yash, et al. “Making the v in VQA Matter: Elevating the Role of Image Understanding in Visual Question Answering.” Computer Vision and Pattern Recognition, 1 July 2017, https://doi.org/10.1109/cvpr.2017.670. Accessed 21 Apr. 2023.
+<a href="agrawal2017"></a>[1] Agrawal, A. et al. (2017). "VQA v2: Balanced Datasets for Visual Question Answering." *CVPR*.
 
-<a href="marino2019"></a>[2] Marino, Kenneth, et al. “OK-VQA: A Visual Question Answering Benchmark Requiring External Knowledge.” ArXiv (Cornell University), 1 June 2019, https://doi.org/10.1109/cvpr.2019.00331. Accessed 11 Nov. 2023.
+<a href="antol2015"></a>[2] Antol, S., Agrawal, A., Lu, J., Mitchell, M., Batra, D., Zitnick, C. L., & Parikh, D. (2015). Vqa: Visual question answering. In Proceedings of the IEEE international conference on computer vision (pp. 2425-2433).
 
-<a href="wang2024"></a>[3] Wang, Ke, et al. “Measuring Multimodal Mathematical Reasoning with MATH-Vision Dataset.” ArXiv (Cornell University), 22 Feb. 2024, https://doi.org/10.48550/arxiv.2402.14804.
+<a href="defaria2023"></a>[3] de Faria, Ana Cláudia Akemi Matsuki, et al. "Visual question answering: A survey on techniques and common trends in recent literature." arXiv preprint arXiv:2305.11033 (2023).
 
-<a href="ishmam2024"></a>[4] Farhan, Ishmam Md, et al. “Visual Robustness Benchmark for Visual Question Answering (VQA).” ArXiv (Cornell University), 3 July 2024, https://doi.org/10.48550/arxiv.2407.03386. Accessed 13 Dec. 2024.
+<a href="devlin2019"></a>[4] Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019, May 24). Bert: Pre-training of deep bidirectional Transformers for language understanding. arXiv.org. https://arxiv.org/abs/1810.04805
 
-<a href="laurencon2024"></a>[5] Laurençon, Hugo, et al. “Building and Better Understanding Vision-Language Models: Insights and Future Directions.” ArXiv (Cornell University), 22 Aug. 2024, https://doi.org/10.48550/arxiv.2408.12637. Accessed 13 Dec. 2024.
+<a href="dosovitskiy2021"></a>[5] Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J., & Houlsby, N. (2021, June 3). An image is worth 16x16 words: Transformers for image recognition at scale. arXiv.org. https://arxiv.org/abs/2010.11929
 
-<a href="liu2023"></a>[6] Liu, Haotian, et al. “Visual Instruction Tuning.” ArXiv.org, 17 Apr. 2023, arxiv.org/abs/2304.08485.
-- Antol, S. et al. (2015). "VQA: Visual Question Answering." *ICCV*.
-- Teney, D. et al. (2018). "Tips and Tricks for Visual Question Answering." *CVPR*.
-- Hudson, D. & Manning, C.D. (2019). "GQA: A New Dataset for Real-World Visual Reasoning." *CVPR*.
-- Vaswani, A. et al. (2017). "Attention Is All You Need." *NIPS*.
-- Devlin, J. et al. (2019). "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding." *NAACL-HLT*.
-- Dosovitskiy, A. et al. (2021). "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale." *ICLR*.
-- Radford, A. et al. (2018). "Improving Language Understanding by Generative Pre-Training." OpenAI blog.
-- Agrawal, A. et al. (2017). "VQA v2: Balanced Datasets for Visual Question Answering." *CVPR*.
-- Liu, J. et al. (2023). "LLaVA: Large Language and Vision Assistant." arXiv:2304.08485.
-- Hugging Face Blog (2023). "Idefics: An Open-source Instruction-tuned Vision-Language Model." [https://huggingface.co/blog/idefics](https://huggingface.co/blog/idefics)
-- Wu, Z. & Palmer, M. (1994). "Verbs Semantics and Lexical Selection." *ACL*.
+<a href="ishmam2024"></a>[6] Farhan, Ishmam Md, et al. “Visual Robustness Benchmark for Visual Question Answering (VQA).” ArXiv (Cornell University), 3 July 2024, https://doi.org/10.48550/arxiv.2407.03386. Accessed 13 Dec. 2024.
 
-de Faria, Ana Cláudia Akemi Matsuki, et al. "Visual question answering: A survey on techniques and common trends in recent literature." arXiv preprint arXiv:2305.11033 (2023).
-Kafle, Kushal, and Christopher Kanan. "An analysis of visual question answering algorithms." Proceedings of the IEEE international conference on computer vision. 2017.
-Sahu, T. (2022, March 8). Visual question answering with Multimodal Transformers. Medium. https://medium.com/data-science-at-microsoft/visual-question-answering-with-multimodal-transformers-d4f57950c867 
+<a href="goyal2017"></a>[7] Goyal, Yash, et al. “Making the v in VQA Matter: Elevating the Role of Image Understanding in Visual Question Answering.” Computer Vision and Pattern Recognition, 1 July 2017, https://doi.org/10.1109/cvpr.2017.670. Accessed 21 Apr. 2023.
+
+<a href="hudson2019"></a>[8] Hudson, D. A., & Manning, C. D. (1970, January 1). GQA: A new dataset for real-world visual reasoning and compositional question answering. CVF Open Access. http://openaccess.thecvf.com/content_CVPR_2019/html/Hudson_GQA_A_New_Dataset_for_Real-World_Visual_Reasoning_and_Compositional_CVPR_2019_paper.html 
+
+<a href="goyal2017"></a>[9] Kafle, Kushal, and Christopher Kanan. "An analysis of visual question answering algorithms." Proceedings of the IEEE international conference on computer vision. 2017.
+
+<a href="huggingface2023"></a>[10] Hugging Face Blog (2023). "Idefics: An Open-source Instruction-tuned Vision-Language Model." [https://huggingface.co/blog/idefics](https://huggingface.co/blog/idefics)
+
+<a href="laurencon2024"></a>[11] Laurençon, Hugo, et al. “Building and Better Understanding Vision-Language Models: Insights and Future Directions.” ArXiv (Cornell University), 22 Aug. 2024, https://doi.org/10.48550/arxiv.2408.12637. Accessed 13 Dec. 2024.
+
+<a href="liu2023"></a>[12] Liu, Haotian, et al. “Visual Instruction Tuning.” ArXiv.org, 17 Apr. 2023, arxiv.org/abs/2304.08485.
+
+<a href="marino2019"></a>[13] Marino, Kenneth, et al. “OK-VQA: A Visual Question Answering Benchmark Requiring External Knowledge.” ArXiv (Cornell University), 1 June 2019, https://doi.org/10.1109/cvpr.2019.00331. Accessed 11 Nov. 2023.
+
+<a href="sahu2022"></a>[14] Sahu, T. (2022, March 8). Visual question answering with Multimodal Transformers. Medium. https://medium.com/data-science-at-microsoft/visual-question-answering-with-multimodal-transformers-d4f57950c867 
+
+<a href="teney2018"></a>[15] Teney, D., Anderson, P., He, X., & van den Hengel, A. (1970, January 1). Tips and tricks for visual question answering: Learnings from the 2017 challenge. CVF Open Access. http://openaccess.thecvf.com/content_cvpr_2018/html/Teney_Tips_and_Tricks_CVPR_2018_paper.html 
+
+
+<a href="vaswani2018"></a>[16] Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (1970, January 1). Attention is all you need. Advances in Neural Information Processing Systems. https://proceedings.neurips.cc/paper/7181-attention-is-all-you-need - Radford, A. et al. (2018). "Improving Language Understanding by Generative Pre-Training." OpenAI blog.
+
+<a href="wang2024"></a>[17] Wang, Ke, et al. “Measuring Multimodal Mathematical Reasoning with MATH-Vision Dataset.” ArXiv (Cornell University), 22 Feb. 2024, https://doi.org/10.48550/arxiv.2402.14804.
+
+<a href="wu1994"></a>[18] Wu, Zhibiao, and Martha Palmer. "Verb semantics and lexical selection." arXiv preprint cmp-lg/9406033 (1994).
