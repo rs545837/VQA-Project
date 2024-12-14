@@ -39,10 +39,12 @@
 <img src="assets/defaria_vqa.png" alt="de Faria - VQA" />
 Fig: An illustration of the VQA task [de Faria]
 
+
 As a task, VQA is notable in that it extends existing vision/NLP tasks (e.g. image captioning, textual Q&A) by requiring multi-modal knowledge across two separate domains (image & natural language). Due to the open-endedness of VQA questions, a performant VQA model must have the capabilities to correctly answer a vast array of possible input queries across many different domains. This requires both a deep image understanding (as in image captioning) and a deep textual understanding (as in textual Q&A); however, it additionally requires the ability to combine knowledge across both domains to successfully answer questions. In this sense, VQA represents a “next step forward” in terms of building a compelling and challenging AI task.
 
 <img src="assets/kafle_vqa.png" alt="Kafle - VQA" />
 Fig: Aspects of the VQA task [Kafle]
+
 
 In particular, a key challenge in VQA is the requirement of common-sense reasoning. For example: to answer questions such as “Does this person have 20/20 vision?” and “Is this person expecting company” (pictured below), a VQA model must be able to both identify and extract the requisite information from relevant aspects of the image, reflecting a deeper notion of image understanding compared to previous image tasks.
 
@@ -652,3 +654,4 @@ We began with a simple open-answer VQA framework and introduced advanced models 
 
 de Faria, Ana Cláudia Akemi Matsuki, et al. "Visual question answering: A survey on techniques and common trends in recent literature." arXiv preprint arXiv:2305.11033 (2023).
 Kafle, Kushal, and Christopher Kanan. "An analysis of visual question answering algorithms." Proceedings of the IEEE international conference on computer vision. 2017.
+Sahu, T. (2022, March 8). Visual question answering with Multimodal Transformers. Medium. https://medium.com/data-science-at-microsoft/visual-question-answering-with-multimodal-transformers-d4f57950c867 
