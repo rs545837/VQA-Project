@@ -1,36 +1,35 @@
 # Visual Question Answering
 
-## Table of Contents
-- [Visual Question Answering](#visual-question-answering)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [VQA](#vqa)
-  - [Evaluation Benchmarks](#evaluation-benchmarks)
-    - [Benchmarks](#benchmarks)
-    - [Augmented VQA](#augmented-vqa)
-    - [Wu-Palmer Similarity](#wu-palmer-similarity)
-  - [Basic Implementation Of VLM](#basic-implementation-of-vlm)
-    - [Motivation](#motivation)
-    - [Architecture](#architecture)
-    - [Code](#code)
-    - [Performance](#performance)
-  - [Idefics3](#idefics3)
-    - [Motivation](#motivation-1)
-    - [Architecture](#architecture-1)
-    - [Code](#code-1)
-    - [Performance](#performance-1)
-  - [LLAVA](#llava)
-    - [Motivation](#motivation-2)
-    - [Architecture](#architecture-2)
-    - [Code](#code-2)
-    - [Performance](#performance-2)
-  - [Results](#results)
-  - [Demo](#demo)
-  - [Similar Works](#similar-works)
-  - [Societal Impact & Applications](#societal-impact--applications)
-  - [Conclusion](#conclusion)
-  - [Future Work](#future-work)
-  - [References](#references)
+### Table of Contents
+ - [Table of Contents](#table-of-contents)
+ - [Introduction](#introduction)
+ - [VQA](#vqa)
+ - [Evaluation Benchmarks](#evaluation-benchmarks)
+   - [Benchmarks](#benchmarks)
+   - [Augmented VQA](#augmented-vqa)
+   - [Wu-Palmer Similarity](#wu-palmer-similarity)
+ - [Basic Implementation Of VLM](#basic-implementation-of-vlm)
+   - [Motivation](#motivation)
+   - [Architecture](#architecture)
+   - [Code](#code)
+   - [Performance](#performance)
+ - [Idefics3](#idefics3)
+   - [Motivation](#motivation-1)
+   - [Architecture](#architecture-1)
+   - [Code](#code-1)
+   - [Performance](#performance-1)
+ - [LLAVA](#llava)
+   - [Motivation](#motivation-2)
+   - [Architecture](#architecture-2)
+   - [Code](#code-2)
+   - [Performance](#performance-2)
+ - [Results](#results)
+ - [Demo](#demo)
+ - [Similar Works](#similar-works)
+ - [Societal Impact & Applications](#societal-impact--applications)
+ - [Conclusion](#conclusion)
+ - [Future Work](#future-work)
+ - [References](#references)
 
 ## Introduction
 **(Open-answer) visual question answering (VQA** for short) is a computer vision task to: given an image and a natural-language question about the image, return an accurate and human-like natural-language response to the query using information in the image. Formally, the open-answer VQA task is: given an image-question pair `(I, q)`, output a sequence of characters `s` (of arbitrary length).
@@ -498,7 +497,7 @@ For more training curves check out wandb: https://wandb.ai/music123/huggingface?
 
 
 
-## Idefic3
+## Idefics3
 
 ### Motivation
 The Idefics3 model was chosen due to its robust performance across diverse benchmarks. Specifically, it was chosen since:
