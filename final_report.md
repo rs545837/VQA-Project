@@ -600,6 +600,12 @@ Credits: https://github.com/haotian-liu/LLaVA/blob/main/
 
 ---
 
+## Societal Impact & Applications
+Due to the open-endedness of the VQA task, many potential applications can be readily formulated for VQA models. Broadly speaking, VQA is a task for eliciting visual information from images and visual media more generally; in this sense, any activity that involves interpreting and extracting knowledge from a visual medium can be seen as a specific instance of VQA.
+
+In particular, a key application of VQA (even cited back when the task was first introduced in 2015 [Antol]) lies in interfaces for the visually impaired. Currently, visually impaired users have limited means of accessing and interacting with image-based content online. Although image captioning and similar methods have partially bridged this gap, current interfaces for visually impaired users lack the ability to make open-ended queries regarding images. In the future, VQA models may be able to provide this service and help visually impaired users engage with images and other forms of media online.
+
+
 ## Conclusion
 We began with a simple open-answer VQA framework and introduced advanced models (Idefics, LLAVA). Baseline models help understand the core pipeline, while cutting-edge architectures utilize instruction tuning, large LLMs, and alignment strategies to achieve superior results. Instruction tuning and semantic evaluation metrics (like WUP) advance VQA from brittle exact-match methods to more human-like reasoning.
 
@@ -637,3 +643,6 @@ We began with a simple open-answer VQA framework and introduced advanced models 
 - Liu, J. et al. (2023). "LLaVA: Large Language and Vision Assistant." arXiv:2304.08485.
 - Hugging Face Blog (2023). "Idefics: An Open-source Instruction-tuned Vision-Language Model." [https://huggingface.co/blog/idefics](https://huggingface.co/blog/idefics)
 - Wu, Z. & Palmer, M. (1994). "Verbs Semantics and Lexical Selection." *ACL*.
+
+de Faria, Ana Cláudia Akemi Matsuki, et al. "Visual question answering: A survey on techniques and common trends in recent literature." arXiv preprint arXiv:2305.11033 (2023).
+Kafle, Kushal, and Christopher Kanan. "An analysis of visual question answering algorithms." Proceedings of the IEEE international conference on computer vision. 2017.
