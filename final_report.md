@@ -35,20 +35,18 @@
 **(Open-answer) visual question answering (VQA** for short) is a computer vision task to: given an image and a natural-language question about the image, return an accurate and human-like natural-language response to the query using information in the image. Formally, the open-answer VQA task is: given an image-question pair `(I, q)`, output a sequence of characters `s` (of arbitrary length).
 
 
-<img src="assets/defaria_vqa.png" alt="de Faria - VQA" />
-Fig: An illustration of the VQA task [[3](#defaria2023)]
-
+![An illustration of the VQA task](./assets/defaria_vqa.png)
+*Fig 1: An illustration of the VQA task [[3](#defaria2023)]*
 
 As a task, VQA is notable in that it extends existing vision/NLP tasks (e.g. image captioning, textual Q&A) by requiring multi-modal knowledge across two separate domains (image & natural language). Due to the open-endedness of VQA questions, a performant VQA model must have the capabilities to correctly answer a vast array of possible input queries across many different domains. This requires both a deep image understanding (as in image captioning) and a deep textual understanding (as in textual Q&A); however, it additionally requires the ability to combine knowledge across both domains to successfully answer questions. In this sense, VQA represents a “next step forward” in terms of building a compelling and challenging AI task.
 
-<img src="assets/kafle_vqa.png" alt="Kafle - VQA" />
-Fig: Aspects of the VQA task [[9](#kafle2017)]
-
+![Aspects of the VQA task](./assets/kafle_vqa.png)
+*Fig 2: Aspects of the VQA task [[9](#kafle2017)]*
 
 In particular, a key challenge in VQA is the requirement of common-sense reasoning. For example: to answer questions such as “Does this person have 20/20 vision?” and “Is this person expecting company” (pictured below), a VQA model must be able to both identify and extract the requisite information from relevant aspects of the image, reflecting a deeper notion of image understanding compared to previous image tasks.
 
-<img src="assets/antol_reasoning.png" alt="Antol - Reasoning in VQA" />
-Fig: Reasoning tasks in VQA [[2](#antol2015)]
+![Reasoning tasks in VQA](./assets/antol_reasoning.png)
+*Fig 3: Reasoning tasks in VQA [[2](#antol2015)]*
 
 ## VQA
 Most VQA architectures consist of two components -- an ***encoder*** and a ***decoder*** -- that perform the following sequence of steps:
@@ -86,8 +84,8 @@ $$
 
 Due to importance of the multimodal fusion step in allowing image and textual knowledge to be combined, choice of fusion method is an important part of designing architectures for VQA. There is a tradeoff between the complexity of feature extraction models and the complexity of the fusion step: a complex set of image and text embeddings may require only a single hidden layer and concatenation for fusion, whereas a simpler set of models for feature extraction may benefit from a more sophisticated fusion layer. [[14](#sahu2022)]
 
-<img src="assets/medium_fusion.png" alt="Multimodal Fusion for VQA" />
-Fig: Aspects of the VQA task [[14](#sahu2022)]
+![Multimodal Fusion for VQA](./assets/medium_fusion.png)
+*Fig 4: Multimodal Fusion for VQA [[14](#sahu2022)]*
 
 Two common approaches for multimodal fusion are (i) concatenation + linear projection, or (ii) cross-attention.
 
@@ -114,7 +112,7 @@ In order to evaluate the models, we chose 3 datasets that collectively address d
 
 *Examples*:
 ![VQAv2 Examples](./images/vqav2_examples.png)
-Image taken from [[7](#goyal2017)].
+*Fig 5: VQAv2 Examples [[7](#goyal2017)].*
 
 #### OK-VQA
 *Motivation*: Current VQA datasets favor image recognition and simple questions such as counting or identifying colors. However, real-world VQA tasks require reasoning using information from outside the image or question domain. OK-VQA addresses this by creating a dataset that requires reasoning using information from outside the image or question domain.
@@ -125,7 +123,7 @@ Image taken from [[7](#goyal2017)].
 
 *Examples*:
 ![OK-VQA Examples](./images/okvqa_examples.png)
-Image taken from [[13]](#marino2019).
+*Fig 6: OK-VQA Examples [[13]](#marino2019).*
 
 #### MATH-VQA
 *Motivation*: This dataset tests the mathematical reasoning ability of a model as compared to an average human. It provides a broad and diverse dataset of questions testing the mathematical reasoning ability of models.
@@ -136,14 +134,14 @@ Image taken from [[13]](#marino2019).
 
 *Examples*:
 ![MATH-VQA Examples](./images/mathvqa_examples.png)
-Image taken from \[[17](#wang2024)\].
+*Fig 7: MATH-VQA Examples \[[17](#wang2024)\].*
 
 ### Augmented VQA
 Standard datasets are excellent benchmarks for evaluating baseline performance. However, real-world applications often involve **noisy and distorted visual inputs**, making robustness critical. To address this, we created **A-VQA**, an augmented version of VQAv2 using a variety of augmentation techniques inspired by Ishmam et al. (2024) [[6](#ishmam2024)].
 
 #### Augmentation Techniques
 ![Augmentation Techniques](./images/augments.png)
-Image taken from [[6](#ishmam2024)].
+*Fig 8: Augmentation Techniques [[6](#ishmam2024)].*
 
 The above image shows the augmentation techniques implemented in Ishmam et al. (2024) [[6](#ishmam2024)]. For our A-VQA dataset, we implemented the following augmentation techniques:
 
@@ -397,37 +395,37 @@ VQA tasks often involve semantically close answers. For instance:
 Exact-match scoring would return incorrect here, but WPS, derived from the WordNet lexical hierarchy, scores based on the **semantic distance** between terms.  
 
 ### **Technical Details**
-WPS is calculated as:  
+WUPS is calculated as:  
+
 $$
-\text{WPS}(x, y) = \frac{2 \cdot \text{Depth}(LCS(x, y))}{\text{Depth}(x) + \text{Depth}(y)}
+\text{WUPS}(x, y) = \frac{2 \cdot \text{Depth}(LCS(x, y))}{\text{Depth}(x) + \text{Depth}(y)}
 $$
+
 where:
-- \( LCS(x, y) \): Lowest Common Subsumer of \( x \) and \( y \) in the WordNet tree.
+- \( LCS(x, y) \): Longest Common Subsequence of \( x \) and \( y \) in the WordNet tree.
 - Depth: Distance from the root node in the WordNet hierarchy.
 
-## Basic Implementation of VLM
-
-### Motivation
+## Our VLM Model
 
 ### Architecture
-A simple pipeline:
+Following the general framework outlined above, we used the following pipeline:
 
-- Text Encoder (BERT)
-- Image Encoder (ViT)
-- Fusion layer (FC + ReLU)
-- Classifier or Language Decoder
+1. **Text Encoder**: BERT
+2. **Image Encoder**: ViT
+3. **Fusion layer**: FC + ReLU
+4. **Language Model**: GPT2
 
 #### Vision Encoder
 
 We utilize Vision Transformer (ViT) as the backbone for image feature extraction. ViT splits images into patches and applies the Transformer architecture directly to these patches, enabling efficient computation and scalability. The encoder outputs a high-dimensional feature vector representing the image.
 
-**Model Used**: google/vit-base-patch16-224
+**Model Used**: `google/vit-base-patch16-224`
 
 #### Text Encoder
 
 For the text encoder, we use BERT (Bidirectional Encoder Representations from Transformers). BERT generates a contextual embedding for the question by considering bidirectional relationships between words.
 
-**Model Used**: bert-base-uncased
+**Model Used**: `bert-base-uncased`
 
 #### Multimodal Fusion
 
@@ -437,7 +435,7 @@ A fully connected layer is used to combine the vision and text embeddings. The f
 
 The GPT-2 language model generates the natural language response. The decoder takes the fused multimodal embeddings as input and produces the answer in a token-by-token manner.
 
-**Model Used**: gpt2
+**Model Used**: `GPT-2`
 
 #### Implementation Details
 
@@ -469,9 +467,7 @@ Below are some example results of the VQA model on test images. Each image inclu
 |-----------|-----------|-----------|-----------|-----------|
 | <img src="assets/image1.png" width="200px" alt="Example 1" /> | <img src="assets/image2.png" width="200px" alt="Example 2" /> | <img src="assets/image3.png" width="200px" alt="Example 3" /> | <img src="assets/image4.png" width="200px" alt="Example 4" /> | <img src="assets/image5.png" width="200px" alt="Example 5" /> |
 
-
-
-**Caption**: Each image displays the question and predicted answer produced by the model.
+*Fig 9: Model question & predicted answer pairs.*
 
 #### Future Work
 
@@ -490,6 +486,7 @@ Below are some example results of the VQA model on test images. Each image inclu
 ### Training Curves
 For more training curves check out wandb: https://wandb.ai/music123/huggingface?nw=nwuserrs545837
 <img width="854" alt="Screenshot 2024-12-13 at 10 46 39 PM" src="https://github.com/user-attachments/assets/8adaea19-16fa-41c6-b1d5-defc72401806" />
+*Fig 10: Training Curve for Our Model*
 
 
 ### Performance
@@ -507,7 +504,7 @@ The Idefics3 model was chosen due to its robust performance across diverse bench
 
 ### Architecture
 ![Idefics3 Architecture](./images/idefic_arch.png)
-Image taken from [[11](#laurencon2024)].
+*Fig 10: Idefics3 Architecture [[11](#laurencon2024)].*
 
 1. *Vision Encoder*: The model uses the SigLIP-SO400M transformer as the vision encoder. The transformer is an open-source model developed by Google using the CLIP architecture with Sigmoid loss. 
 2. *LLM*: The model uses Llama 3.1 Instruct as the language model. This is a big upgrade from Mistral 7B which is significantly outperformed by Llama 3.1.
@@ -543,7 +540,7 @@ def run_inference(model, processor, image, text_prompt):
 ### Performance
 Here is the performance of Idefics3 on some commonly used benchmarks:
 ![Idefics3 Performance](./images/idefic_perf.png)
-Image taken from [[6](#laurencon2024)].
+Fig 11: Idefics3 Performance [[6](#laurencon2024)].
 
 ## LLAVA
 
@@ -554,7 +551,7 @@ LLAVA is another robust, state of the art model capable of open-domain question 
 
 ### Architecture
 ![LLaVA Architecture](./images/llava_arch.png)
-Image taken from [[12](#liu2023)].
+*Fig 12: LLaVA Architecture [[12](#liu2023)].*
 
 1. *Vision Encoder*: This model uses a pre-trained CLIP visual encoder ViT-L/14.
 2. *Language Model*: This model uses Vicuna due to its superior instruction following abilities.
