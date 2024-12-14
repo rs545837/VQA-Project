@@ -209,8 +209,31 @@ For more training curves check out wandb: https://wandb.ai/music123/huggingface?
 
 ## Similar Works
 
+---
+
 ## Conclusion
+We began with a simple open-answer VQA framework and introduced advanced models (Idefics, LLAVA). Baseline models help understand the core pipeline, while cutting-edge architectures utilize instruction tuning, large LLMs, and alignment strategies to achieve superior results. Instruction tuning and semantic evaluation metrics (like WUP) advance VQA from brittle exact-match methods to more human-like reasoning.
+
+---
 
 ## Future Work
+- **Fine-Grained Reasoning**: Better compositional understanding of scenes.
+- **Advanced Fusion**: Employ more sophisticated cross-attention or hypercomplex layers.
+- **Evaluation**: Incorporate richer semantic metrics (BERTScore, BLEU variants, human evaluation).
+- **Domain Adaptation**: Specialize models to domains like medical or scientific imaging.
+- **Instruction & RLHF**: Apply reinforcement learning from human feedback to further align models with user intent.
+
+---
 
 ## References
+- Antol, S. et al. (2015). "VQA: Visual Question Answering." *ICCV*.
+- Teney, D. et al. (2018). "Tips and Tricks for Visual Question Answering." *CVPR*.
+- Hudson, D. & Manning, C.D. (2019). "GQA: A New Dataset for Real-World Visual Reasoning." *CVPR*.
+- Vaswani, A. et al. (2017). "Attention Is All You Need." *NIPS*.
+- Devlin, J. et al. (2019). "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding." *NAACL-HLT*.
+- Dosovitskiy, A. et al. (2021). "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale." *ICLR*.
+- Radford, A. et al. (2018). "Improving Language Understanding by Generative Pre-Training." OpenAI blog.
+- Agrawal, A. et al. (2017). "VQA v2: Balanced Datasets for Visual Question Answering." *CVPR*.
+- Liu, J. et al. (2023). "LLaVA: Large Language and Vision Assistant." arXiv:2304.08485.
+- Hugging Face Blog (2023). "Idefics: An Open-source Instruction-tuned Vision-Language Model." [https://huggingface.co/blog/idefics](https://huggingface.co/blog/idefics)
+- Wu, Z. & Palmer, M. (1994). "Verbs Semantics and Lexical Selection." *ACL*.
