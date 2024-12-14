@@ -82,6 +82,7 @@ $$
 Due to importance of the multimodal fusion step in allowing image and textual knowledge to be combined, choice of fusion method is an important part of designing architectures for VQA. There is a tradeoff between the complexity of feature extraction models and the complexity of the fusion step: a complex set of image and text embeddings may require only a single hidden layer and concatenation for fusion, whereas a simpler set of models for feature extraction may benefit from a more sophisticated fusion layer. [[14](#sahu2022)]
 
 ![Multimodal Fusion for VQA](./assets/medium_fusion.png)
+
 *Fig 4: Multimodal Fusion for VQA [[14](#sahu2022)]*
 
 Two common approaches for multimodal fusion are (i) concatenation + linear projection, or (ii) cross-attention.
@@ -91,7 +92,7 @@ Two common approaches for multimodal fusion are (i) concatenation + linear proje
 A language decoder (e.g., GPT-2) generates the answer token-by-token from the fused representation:
 
 $$
-P(s|\mathbf{F}) = \prod_{t} P(s_t \mid s_{<t}, \mathbf{F})
+P(s|\mathbf{F}) = \prod_{t} P(s_t \mid s_{t}, \mathbf{F})
 $$
 
 ## Our VLM Model
