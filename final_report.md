@@ -159,6 +159,18 @@ The fused embeddings are passed into GPT-2 for answer generation.
 
 Currently, the model is in its basic implementation phase. Preliminary results indicate that the architecture is functional, with generated answers being syntactically coherent but requiring fine-tuning for better accuracy.
 
+Below are some example results of the VQA model on test images. Each image includes the question, the ground-truth answer, and the model’s predicted answer.
+
+<!-- Displaying 5 images side by side using a Markdown table -->
+
+| Example 1 | Example 2 | Example 3 | Example 4 | Example 5 |
+|-----------|-----------|-----------|-----------|-----------|
+| <img src="assets/image1.png" width="200px" alt="Example 1" /> | <img src="assets/image2.png" width="200px" alt="Example 2" /> | <img src="assets/image3.png" width="200px" alt="Example 3" /> | <img src="assets/image4.png" width="200px" alt="Example 4" /> | <img src="assets/image5.png" width="200px" alt="Example 5" /> |
+
+
+
+**Caption**: Each image displays the question and predicted answer produced by the model.
+
 #### Future Work
 
 - **Fine-Tuning**: Train the model on a large-scale VQA dataset for improved performance.
