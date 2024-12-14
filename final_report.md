@@ -4,11 +4,7 @@
  - [Table of Contents](#table-of-contents)
  - [Introduction](#introduction)
  - [VQA](#vqa)
- - [Evaluation Benchmarks](#evaluation-benchmarks)
-   - [Benchmarks](#benchmarks)
-   - [Augmented VQA](#augmented-vqa)
-   - [Wu-Palmer Similarity](#wu-palmer-similarity)
- - [Basic Implementation Of VLM](#basic-implementation-of-vlm)
+ - [Our VLM Model](#our-vlm-model)
    - [Motivation](#motivation)
    - [Architecture](#architecture)
    - [Code](#code)
@@ -23,9 +19,10 @@
    - [Architecture](#architecture-2)
    - [Code](#code-2)
    - [Performance](#performance-2)
- - [Results](#results)
- - [Demo](#demo)
- - [Similar Works](#similar-works)
+ - [Evaluation Benchmarks](#evaluation-benchmarks)
+   - [Benchmarks](#benchmarks)
+   - [Augmented VQA](#augmented-vqa)
+   - [Wu-Palmer Similarity](#wu-palmer-similarity)
  - [Societal Impact & Applications](#societal-impact--applications)
  - [Conclusion](#conclusion)
  - [Future Work](#future-work)
@@ -97,6 +94,198 @@ $$
 P(s|\mathbf{F}) = \prod_{t} P(s_t \mid s_{<t}, \mathbf{F})
 $$
 
+## Our VLM Model
+
+### Architecture
+Following the general framework outlined above, we used the following pipeline:
+
+1. **Text Encoder**: BERT
+2. **Image Encoder**: ViT
+3. **Fusion layer**: FC + ReLU
+4. **Language Model**: GPT2
+
+#### Vision Encoder
+
+We utilize Vision Transformer (ViT) as the backbone for image feature extraction. ViT splits images into patches and applies the Transformer architecture directly to these patches, enabling efficient computation and scalability. The encoder outputs a high-dimensional feature vector representing the image.
+
+**Model Used**: `google/vit-base-patch16-224`
+
+#### Text Encoder
+
+For the text encoder, we use BERT (Bidirectional Encoder Representations from Transformers). BERT generates a contextual embedding for the question by considering bidirectional relationships between words.
+
+**Model Used**: `bert-base-uncased`
+
+#### Multimodal Fusion
+
+A fully connected layer is used to combine the vision and text embeddings. The fused representation enables the decoder to utilize both modalities effectively.
+
+#### Language Decoder
+
+The GPT-2 language model generates the natural language response. The decoder takes the fused multimodal embeddings as input and produces the answer in a token-by-token manner.
+
+**Model Used**: `GPT-2`
+
+#### Implementation Details
+
+The VQA model is implemented in PyTorch using the Transformers library. Key steps:
+
+**Preprocessing**:
+
+Images are resized and converted into tensor format using a feature extractor.
+
+Questions are tokenized into embeddings.
+
+**Forward Pass**:
+
+Vision and text features are extracted using ViT and BERT.
+
+Features are fused using a linear layer.
+
+The fused embeddings are passed into GPT-2 for answer generation.
+
+#### Results
+
+Currently, the model is in its basic implementation phase. Preliminary results indicate that the architecture is functional, with generated answers being syntactically coherent but requiring fine-tuning for better accuracy.
+
+Below are some example results of the VQA model on test images. Each image includes the question, the ground-truth answer, and the model’s predicted answer.
+
+<!-- Displaying 5 images side by side using a Markdown table -->
+
+| Example 1 | Example 2 | Example 3 | Example 4 | Example 5 |
+|-----------|-----------|-----------|-----------|-----------|
+| <img src="assets/image1.png" width="200px" alt="Example 1" /> | <img src="assets/image2.png" width="200px" alt="Example 2" /> | <img src="assets/image3.png" width="200px" alt="Example 3" /> | <img src="assets/image4.png" width="200px" alt="Example 4" /> | <img src="assets/image5.png" width="200px" alt="Example 5" /> |
+
+*Fig 5: Model question & predicted answer pairs.*
+
+#### Future Work
+
+- **Fine-Tuning**: Train the model on a large-scale VQA dataset for improved performance.
+
+- **Augmented VQA**: Integrate semantic similarity metrics like Wu-Palmer similarity for robust evaluation.
+
+- **Model Optimization**: Experiment with advanced fusion techniques and larger language models.
+
+- **Benchmarks**: Evaluate on standard datasets such as VQA v2 and GQA.
+
+
+
+### Code
+
+### Training Curves
+For more training curves check out wandb: https://wandb.ai/music123/huggingface?nw=nwuserrs545837
+<img width="854" alt="Screenshot 2024-12-13 at 10 46 39 PM" src="https://github.com/user-attachments/assets/8adaea19-16fa-41c6-b1d5-defc72401806" />
+
+*Fig 6: Training Curve for Our Model*
+
+
+### Performance
+
+
+
+
+## Idefics3
+
+### Motivation
+The Idefics3 model was chosen due to its robust performance across diverse benchmarks. Specifically, it was chosen since:
+- **State of the Art**: Idefics3 is considered state-of-the-art for multiple benchmarks.
+- **Efficiency**: Idefics3 is a lightweight model that is efficient to train and deploy.
+- **Open Domain Tasks**: Idefics3 is able to perform well on open domain tasks such as VQA as well as closed domain tasks (e.g. MCQs) showing its versatility.
+
+### Architecture
+![Idefics3 Architecture](./images/idefic_arch.png)
+*Fig 7: Idefics3 Architecture [[11](#laurencon2024)].*
+
+1. *Vision Encoder*: The model uses the SigLIP-SO400M transformer as the vision encoder. The transformer is an open-source model developed by Google using the CLIP architecture with Sigmoid loss. 
+2. *LLM*: The model uses Llama 3.1 Instruct as the language model. This is a big upgrade from Mistral 7B which is significantly outperformed by Llama 3.1.
+3. *Pixel Shuffle*: The model uses a pixel shuffle strategy to connect the vision encoder and the language model. This allows the model to enhance its OCR abilities while acting as a pooling tecnique to reduce the number of hidden states in the model by a factor of 4. 
+
+### Code
+The Idefics3 model is publicly available on HuggingFace. To import the model, 
+```python
+from transformers import AutoProcessor, AutoModelForVision2Seq
+import torch
+
+model_name = "HuggingFaceM4/Idefics3-8B-Llama3"
+model = AutoModelForVision2Seq.from_pretrained(model_name, torch_dtype=torch.float16)
+processor = AutoProcessor.from_pretrained(model_name)
+```
+
+Once you have imported the model, you can use the following function to run inference on a text-image pair.
+```python
+def run_inference(model, processor, image, text_prompt):
+  inputs = processor(
+    images=image, 
+    text=text_prompt, 
+    return_tensors="pt"
+    ).to("cuda", torch.float16)
+  generated_ids = model.generate(**inputs)
+  generated_text = processor.batch_decode(
+    generated_ids, 
+    skip_special_tokens=True
+    )[0].strip()
+  return generated_text
+```
+
+### Performance
+Here is the performance of Idefics3 on some commonly used benchmarks:
+![Idefics3 Performance](./images/idefic_perf.png)
+*Fig 8: Idefics3 Performance [[6](#laurencon2024)].*
+
+## LLAVA
+
+### Motivation
+LLAVA is another robust, state of the art model capable of open-domain question answering. Specifically, it was selected due to:
+- **Visual Understanding**: LLAVA is able to perform fine grained visual understanding such as recognizing small objects, or subtle attributes.
+- **Robust Multimodal Pretraining**: LLAVA is trained on a vast dataset of text-image pairs, allowing to capture the semantic relationship between the image and the text.
+
+### Architecture
+![LLaVA Architecture](./images/llava_arch.png)
+*Fig 9: LLaVA Architecture [[12](#liu2023)].*
+
+1. *Vision Encoder*: This model uses a pre-trained CLIP visual encoder ViT-L/14.
+2. *Language Model*: This model uses Vicuna due to its superior instruction following abilities.
+3. *Linear Projection*: The model uses a learnable linear projection to connect the image features to the word embedding space. 
+
+### Code
+Similar to Idefics3, LLaVA is also available on HuggingFace. Thus, LLaVA can be imported and run as follows:
+
+```python
+from transformers import AutoProcessor, AutoModelForVision2Seq
+import torch
+
+model_name = "liuhaotian/llava-v1.6-vicuna-7b"
+model = AutoModelForVision2Seq.from_pretrained(model_name, torch_dtype=torch.float16)
+processor = AutoProcessor.from_pretrained(model_name)
+
+def run_inference(model, processor, image, text_prompt):
+  inputs = processor(
+    images=image, 
+    text=text_prompt, 
+    return_tensors="pt"
+    ).to("cuda", torch.float16)
+  generated_ids = model.generate(**inputs)
+  generated_text = processor.batch_decode(
+    generated_ids, 
+    skip_special_tokens=True
+    )[0].strip()
+  return generated_text
+
+# Example usage
+image = Image.open("path/to/image.jpg")
+text_prompt = "What is the color of the object in the image?"
+result = run_inference(model, processor, image, text_prompt)
+print(result)
+```
+### Performance
+| Version | LLM | Schedule | Checkpoint | MMMU | MathVista | VQAv2 | GQA | VizWiz | SQA | TextVQA | POPE | MME | MM-Bench | MM-Bench-CN | SEED-IMG | LLaVA-Bench-Wild | MM-Vet |
+|----------|----------|-----------|-----------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LLaVA-1.6 | Vicuna-7B | full_ft-1e | [liuhaotian/llava-v1.6-vicuna-7b](https://huggingface.co/liuhaotian/llava-v1.6-vicuna-7b) | 35.8 | 34.6 | 81.8 | 64.2 | 57.6 | 70.1 | 64.9 | 86.5 | 1519/332 | 67.4 | 60.6 | 70.2 | 81.6 | 43.9 |
+| LLaVA-1.6 | Vicuna-13B | full_ft-1e | [liuhaotian/llava-v1.6-vicuna-13b](https://huggingface.co/liuhaotian/llava-v1.6-vicuna-13b) | 36.2 | 35.3 | 82.8 | 65.4 | 60.5 | 73.6 | 67.1 | 86.2 | 1575/326 | 70 | 64.4 | 71.9 | 87.3 | 48.4 |
+| LLaVA-1.6 | Mistral-7B | full_ft-1e | [liuhaotian/llava-v1.6-mistral-7b](https://huggingface.co/liuhaotian/llava-v1.6-mistral-7b) | 35.3 | 37.7 | 82.2 | 64.8 | 60.0 | 72.8 | 65.7 | 86.7 | 1498/321 | 68.7 | 61.2 | 72.2 | 83.2 | 47.3 |
+| LLaVA-1.6 | Hermes-Yi-34B | full_ft-1e | [liuhaotian/llava-v1.6-34b](https://huggingface.co/liuhaotian/llava-v1.6-34b) | 51.1 | 46.5 | 83.7 | 67.1 | 63.8 | 81.8 | 69.5 | 87.7 | 1631/397 | 79.3 | 79 | 75.9 | 89.6 | 57.4 |
+
+Credits: https://github.com/haotian-liu/LLaVA/blob/main/
 
 ## Evaluation Benchmarks
 
@@ -112,7 +301,7 @@ In order to evaluate the models, we chose 3 datasets that collectively address d
 
 *Examples*:
 ![VQAv2 Examples](./images/vqav2_examples.png)
-*Fig 5: VQAv2 Examples [[7](#goyal2017)].*
+*Fig 10: VQAv2 Examples [[7](#goyal2017)].*
 
 #### OK-VQA
 *Motivation*: Current VQA datasets favor image recognition and simple questions such as counting or identifying colors. However, real-world VQA tasks require reasoning using information from outside the image or question domain. OK-VQA addresses this by creating a dataset that requires reasoning using information from outside the image or question domain.
@@ -123,7 +312,7 @@ In order to evaluate the models, we chose 3 datasets that collectively address d
 
 *Examples*:
 ![OK-VQA Examples](./images/okvqa_examples.png)
-*Fig 6: OK-VQA Examples [[13]](#marino2019).*
+*Fig 11: OK-VQA Examples [[13]](#marino2019).*
 
 #### MATH-VQA
 *Motivation*: This dataset tests the mathematical reasoning ability of a model as compared to an average human. It provides a broad and diverse dataset of questions testing the mathematical reasoning ability of models.
@@ -134,14 +323,14 @@ In order to evaluate the models, we chose 3 datasets that collectively address d
 
 *Examples*:
 ![MATH-VQA Examples](./images/mathvqa_examples.png)
-*Fig 7: MATH-VQA Examples \[[17](#wang2024)\].*
+*Fig 12: MATH-VQA Examples \[[17](#wang2024)\].*
 
 ### Augmented VQA
 Standard datasets are excellent benchmarks for evaluating baseline performance. However, real-world applications often involve **noisy and distorted visual inputs**, making robustness critical. To address this, we created **A-VQA**, an augmented version of VQAv2 using a variety of augmentation techniques inspired by Ishmam et al. (2024) [[6](#ishmam2024)].
 
 #### Augmentation Techniques
 ![Augmentation Techniques](./images/augments.png)
-*Fig 8: Augmentation Techniques [[6](#ishmam2024)].*
+*Fig 13: Augmentation Techniques [[6](#ishmam2024)].*
 
 The above image shows the augmentation techniques implemented in Ishmam et al. (2024) [[6](#ishmam2024)]. For our A-VQA dataset, we implemented the following augmentation techniques:
 
@@ -404,205 +593,6 @@ $$
 where:
 - \( LCS(x, y) \): Longest Common Subsequence of \( x \) and \( y \) in the WordNet tree.
 - Depth: Distance from the root node in the WordNet hierarchy.
-
-## Our VLM Model
-
-### Architecture
-Following the general framework outlined above, we used the following pipeline:
-
-1. **Text Encoder**: BERT
-2. **Image Encoder**: ViT
-3. **Fusion layer**: FC + ReLU
-4. **Language Model**: GPT2
-
-#### Vision Encoder
-
-We utilize Vision Transformer (ViT) as the backbone for image feature extraction. ViT splits images into patches and applies the Transformer architecture directly to these patches, enabling efficient computation and scalability. The encoder outputs a high-dimensional feature vector representing the image.
-
-**Model Used**: `google/vit-base-patch16-224`
-
-#### Text Encoder
-
-For the text encoder, we use BERT (Bidirectional Encoder Representations from Transformers). BERT generates a contextual embedding for the question by considering bidirectional relationships between words.
-
-**Model Used**: `bert-base-uncased`
-
-#### Multimodal Fusion
-
-A fully connected layer is used to combine the vision and text embeddings. The fused representation enables the decoder to utilize both modalities effectively.
-
-#### Language Decoder
-
-The GPT-2 language model generates the natural language response. The decoder takes the fused multimodal embeddings as input and produces the answer in a token-by-token manner.
-
-**Model Used**: `GPT-2`
-
-#### Implementation Details
-
-The VQA model is implemented in PyTorch using the Transformers library. Key steps:
-
-**Preprocessing**:
-
-Images are resized and converted into tensor format using a feature extractor.
-
-Questions are tokenized into embeddings.
-
-**Forward Pass**:
-
-Vision and text features are extracted using ViT and BERT.
-
-Features are fused using a linear layer.
-
-The fused embeddings are passed into GPT-2 for answer generation.
-
-#### Results
-
-Currently, the model is in its basic implementation phase. Preliminary results indicate that the architecture is functional, with generated answers being syntactically coherent but requiring fine-tuning for better accuracy.
-
-Below are some example results of the VQA model on test images. Each image includes the question, the ground-truth answer, and the model’s predicted answer.
-
-<!-- Displaying 5 images side by side using a Markdown table -->
-
-| Example 1 | Example 2 | Example 3 | Example 4 | Example 5 |
-|-----------|-----------|-----------|-----------|-----------|
-| <img src="assets/image1.png" width="200px" alt="Example 1" /> | <img src="assets/image2.png" width="200px" alt="Example 2" /> | <img src="assets/image3.png" width="200px" alt="Example 3" /> | <img src="assets/image4.png" width="200px" alt="Example 4" /> | <img src="assets/image5.png" width="200px" alt="Example 5" /> |
-
-*Fig 9: Model question & predicted answer pairs.*
-
-#### Future Work
-
-- **Fine-Tuning**: Train the model on a large-scale VQA dataset for improved performance.
-
-- **Augmented VQA**: Integrate semantic similarity metrics like Wu-Palmer similarity for robust evaluation.
-
-- **Model Optimization**: Experiment with advanced fusion techniques and larger language models.
-
-- **Benchmarks**: Evaluate on standard datasets such as VQA v2 and GQA.
-
-
-
-### Code
-
-### Training Curves
-For more training curves check out wandb: https://wandb.ai/music123/huggingface?nw=nwuserrs545837
-<img width="854" alt="Screenshot 2024-12-13 at 10 46 39 PM" src="https://github.com/user-attachments/assets/8adaea19-16fa-41c6-b1d5-defc72401806" />
-*Fig 10: Training Curve for Our Model*
-
-
-### Performance
-
-
-
-
-## Idefics3
-
-### Motivation
-The Idefics3 model was chosen due to its robust performance across diverse benchmarks. Specifically, it was chosen since:
-- **State of the Art**: Idefics3 is considered state-of-the-art for multiple benchmarks.
-- **Efficiency**: Idefics3 is a lightweight model that is efficient to train and deploy.
-- **Open Domain Tasks**: Idefics3 is able to perform well on open domain tasks such as VQA as well as closed domain tasks (e.g. MCQs) showing its versatility.
-
-### Architecture
-![Idefics3 Architecture](./images/idefic_arch.png)
-*Fig 10: Idefics3 Architecture [[11](#laurencon2024)].*
-
-1. *Vision Encoder*: The model uses the SigLIP-SO400M transformer as the vision encoder. The transformer is an open-source model developed by Google using the CLIP architecture with Sigmoid loss. 
-2. *LLM*: The model uses Llama 3.1 Instruct as the language model. This is a big upgrade from Mistral 7B which is significantly outperformed by Llama 3.1.
-3. *Pixel Shuffle*: The model uses a pixel shuffle strategy to connect the vision encoder and the language model. This allows the model to enhance its OCR abilities while acting as a pooling tecnique to reduce the number of hidden states in the model by a factor of 4. 
-
-### Code
-The Idefics3 model is publicly available on HuggingFace. To import the model, 
-```python
-from transformers import AutoProcessor, AutoModelForVision2Seq
-import torch
-
-model_name = "HuggingFaceM4/Idefics3-8B-Llama3"
-model = AutoModelForVision2Seq.from_pretrained(model_name, torch_dtype=torch.float16)
-processor = AutoProcessor.from_pretrained(model_name)
-```
-
-Once you have imported the model, you can use the following function to run inference on a text-image pair.
-```python
-def run_inference(model, processor, image, text_prompt):
-  inputs = processor(
-    images=image, 
-    text=text_prompt, 
-    return_tensors="pt"
-    ).to("cuda", torch.float16)
-  generated_ids = model.generate(**inputs)
-  generated_text = processor.batch_decode(
-    generated_ids, 
-    skip_special_tokens=True
-    )[0].strip()
-  return generated_text
-```
-
-### Performance
-Here is the performance of Idefics3 on some commonly used benchmarks:
-![Idefics3 Performance](./images/idefic_perf.png)
-Fig 11: Idefics3 Performance [[6](#laurencon2024)].
-
-## LLAVA
-
-### Motivation
-LLAVA is another robust, state of the art model capable of open-domain question answering. Specifically, it was selected due to:
-- **Visual Understanding**: LLAVA is able to perform fine grained visual understanding such as recognizing small objects, or subtle attributes.
-- **Robust Multimodal Pretraining**: LLAVA is trained on a vast dataset of text-image pairs, allowing to capture the semantic relationship between the image and the text.
-
-### Architecture
-![LLaVA Architecture](./images/llava_arch.png)
-*Fig 12: LLaVA Architecture [[12](#liu2023)].*
-
-1. *Vision Encoder*: This model uses a pre-trained CLIP visual encoder ViT-L/14.
-2. *Language Model*: This model uses Vicuna due to its superior instruction following abilities.
-3. *Linear Projection*: The model uses a learnable linear projection to connect the image features to the word embedding space. 
-
-### Code
-Similar to Idefics3, LLaVA is also available on HuggingFace. Thus, LLaVA can be imported and run as follows:
-
-```python
-from transformers import AutoProcessor, AutoModelForVision2Seq
-import torch
-
-model_name = "liuhaotian/llava-v1.6-vicuna-7b"
-model = AutoModelForVision2Seq.from_pretrained(model_name, torch_dtype=torch.float16)
-processor = AutoProcessor.from_pretrained(model_name)
-
-def run_inference(model, processor, image, text_prompt):
-  inputs = processor(
-    images=image, 
-    text=text_prompt, 
-    return_tensors="pt"
-    ).to("cuda", torch.float16)
-  generated_ids = model.generate(**inputs)
-  generated_text = processor.batch_decode(
-    generated_ids, 
-    skip_special_tokens=True
-    )[0].strip()
-  return generated_text
-
-# Example usage
-image = Image.open("path/to/image.jpg")
-text_prompt = "What is the color of the object in the image?"
-result = run_inference(model, processor, image, text_prompt)
-print(result)
-```
-### Performance
-| Version | LLM | Schedule | Checkpoint | MMMU | MathVista | VQAv2 | GQA | VizWiz | SQA | TextVQA | POPE | MME | MM-Bench | MM-Bench-CN | SEED-IMG | LLaVA-Bench-Wild | MM-Vet |
-|----------|----------|-----------|-----------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| LLaVA-1.6 | Vicuna-7B | full_ft-1e | [liuhaotian/llava-v1.6-vicuna-7b](https://huggingface.co/liuhaotian/llava-v1.6-vicuna-7b) | 35.8 | 34.6 | 81.8 | 64.2 | 57.6 | 70.1 | 64.9 | 86.5 | 1519/332 | 67.4 | 60.6 | 70.2 | 81.6 | 43.9 |
-| LLaVA-1.6 | Vicuna-13B | full_ft-1e | [liuhaotian/llava-v1.6-vicuna-13b](https://huggingface.co/liuhaotian/llava-v1.6-vicuna-13b) | 36.2 | 35.3 | 82.8 | 65.4 | 60.5 | 73.6 | 67.1 | 86.2 | 1575/326 | 70 | 64.4 | 71.9 | 87.3 | 48.4 |
-| LLaVA-1.6 | Mistral-7B | full_ft-1e | [liuhaotian/llava-v1.6-mistral-7b](https://huggingface.co/liuhaotian/llava-v1.6-mistral-7b) | 35.3 | 37.7 | 82.2 | 64.8 | 60.0 | 72.8 | 65.7 | 86.7 | 1498/321 | 68.7 | 61.2 | 72.2 | 83.2 | 47.3 |
-| LLaVA-1.6 | Hermes-Yi-34B | full_ft-1e | [liuhaotian/llava-v1.6-34b](https://huggingface.co/liuhaotian/llava-v1.6-34b) | 51.1 | 46.5 | 83.7 | 67.1 | 63.8 | 81.8 | 69.5 | 87.7 | 1631/397 | 79.3 | 79 | 75.9 | 89.6 | 57.4 |
-
-Credits: https://github.com/haotian-liu/LLaVA/blob/main/
-## Results
-
-## Demo
-
-## Similar Works
-
----
 
 ## Societal Impact & Applications
 Due to the open-endedness of the VQA task, many potential applications can be readily formulated for VQA models. Broadly speaking, VQA is a task for eliciting visual information from images and visual media more generally; in this sense, any activity that involves interpreting and extracting knowledge from a visual medium can be seen as a specific instance of VQA.
