@@ -59,11 +59,11 @@ Most VQA architectures consist of two components -- an ***encoder*** and a ***de
 In particular, most modern VQA models use a vision backbone (e.g. ResNet, ViT) and text encoder (e.g. Transformer) to compute separate image and text embeddings, then concatenate them to form a joint embedding. This joint embedding is then passed to a large language model/LLM to output the final vector. 
 
 
-# Encoder
+### Encoder
 
 The encoder transforms raw inputs (image and text) into vector representations:
 
-## Feature Extraction:
+#### Feature Extraction:
 
 - **Vision Backbone (e.g., ViT):** Splits the image into patches and processes them with self-attention layers, producing a sequence of image embeddings.
   
@@ -75,7 +75,7 @@ $$
 \mathbf{V} = \text{ViT}(\mathbf{I}) \in \mathbb{R}^{N \times d}, \quad \mathbf{W} = \text{BERT}(q) \in \mathbb{R}^{M \times d}
 $$
 
-## Multimodal Fusion
+#### Multimodal Fusion
 
 A fusion layer combines image and text embeddings into a single representation:
 
@@ -83,9 +83,14 @@ $$
 \mathbf{F} = f(\mathbf{V}, \mathbf{W}) \in \mathbb{R}^{d'}
 $$
 
-Often, a linear projection or cross-attention is used.
+Due to importance of the multimodal fusion step in allowing image and textual knowledge to be combined, choice of fusion method is an important part of designing architectures for VQA. There is a tradeoff between the complexity of feature extraction models and the complexity of the fusion step: a complex set of image and text embeddings may require only a single hidden layer and concatenation for fusion, whereas a simpler set of models for feature extraction may benefit from a more sophisticated fusion layer. [Medium]
 
-## Decoder
+<img src="assets/medium_fusion.png" alt="Multimodal Fusion for VQA" />
+Fig: Aspects of the VQA task [Medium]
+
+Two common approaches for multimodal fusion are (i) concatenation + linear projection, or (ii) cross-attention.
+
+### Decoder
 
 A language decoder (e.g., GPT-2) generates the answer token-by-token from the fused representation:
 
