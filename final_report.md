@@ -93,19 +93,310 @@ P(s|\mathbf{F}) = \prod_{t} P(s_t \mid s_{<t}, \mathbf{F})
 $$
 
 
-# Evaluation Benchmarks
+## Evaluation Benchmarks
 
-Standard datasets like VQA v2 and GQA are used. Models are measured by accuracy against ground-truth answers.
+### Benchmarks
+In order to evaluate the models, we chose 3 datasets that collectively address different aspects of VQA: **VQAv2** for general VQA, **OK-VQA** for visual reasoning using outside knowledge, and **MATH-VQA** for mathematical and logical reasoning. The choice of models result in a robust and comprehensive evaluation of the models.
 
-## Augmented VQA & Wu-Palmer Similarity
+#### VQAv2
+*Motivation*: VQAv2 is a widely used dataset for VQA, often considered as the baseline for VQA models. It emphasizes image and linguistic understanding while eliminating linguistic biases.
 
-Exact string matching is simplistic. Augmenting with Wu-Palmer similarity (WUP) from WordNet provides a semantic measure. The WUP score between two words $a, b$ is:
+*Specifications*:
+- Contains ~1.1 million questions with ~13 million associated answers based on images from the COCO dataset. 
+- Creates a balanced dataset using the following method: "given an (image, question, answer) triplet (I , Q, A) from the VQA dataset, we ask a human subject to identify an image I′ that is similar to I but results in the answer to the question Q to become A′ (which is different from A)."[[1](#goyal2017)]
 
+*Examples*:
+![VQAv2 Examples](./images/vqav2_examples.png)
+Image taken from [[1](#goyal2017)].
+
+#### OK-VQA
+*Motivation*: Current VQA datasets favor image recognition and simple questions such as counting or identifying colors. However, real-world VQA tasks require reasoning using information from outside the image or question domain. OK-VQA addresses this by creating a dataset that requires reasoning using information from outside the image or question domain.
+
+*Specification*:
+- Contains 14,055 questions with 14,031 answers using images from the COCO dataset. 
+> Answering OK-VQA questions is a challeng- ing task since, in addition to understanding the question and the image, the model needs to: (1) learn what knowledge is necessary to answer the questions, (2) determine what query to do to retrieve the necessary knowledge from an outside source of knowledge, and (3) incorporate the knowledge from its original representation to answer the question.[[2]](#marino2019)
+
+*Examples*:
+![OK-VQA Examples](./images/okvqa_examples.png)
+Image taken from [[2](#marino2019)].
+
+#### MATH-VQA
+*Motivation*: This dataset tests the mathematical reasoning ability of a model as compared to an average human. It provides a broad and diverse dataset of questions testing the mathematical reasoning ability of models.
+
+*Specifications*: 
+- Contains 3,040 questions using 3,472 unique images providing mathematical context. 
+- Questions are categorized into 5 difficult levels and 16 distinct mathematical disciplines.
+
+*Examples*:
+![MATH-VQA Examples](./images/mathvqa_examples.png)
+Image taken from \[[3](#wang2024)\].
+
+### Augmented VQA
+Standard datasets are excellent benchmarks for evaluating baseline performance. However, real-world applications often involve **noisy and distorted visual inputs**, making robustness critical. To address this, we created **A-VQA**, an augmented version of VQAv2 using a variety of augmentation techniques inspired by Ishmam et al. (2024) [[4](#ishmam2024)].
+
+#### Augmentation Techniques
+![Augmentation Techniques](./images/augments.png)
+Image taken from [[4](#ishmam2024)].
+
+The above image shows the augmentation techniques implemented in Ishmam et al. (2024) [[4](#ishmam2024)]. For our A-VQA dataset, we implemented the following augmentation techniques:
+
+##### Noise Augmentation
+1. **Shot Noise**: Also called **Poisson Noise**, this technique adds noise to the image using a Poisson distribution.
+  ```python
+  def __shot_noise(self):
+    """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+    c = [.08, .2, 0.5, 0.8, 1.2][self.factor - 1]
+    x = np.array(self.image) / 255.
+    new_img= np.clip(x+(np.random.poisson( size=x.shape, lam=c)), 0, 1) * 255
+    new_img=np.float32(new_img)
+    return cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
+  ```
+2. **Gaussian Noise**: This technique adds noise to the image using a Gaussian distribution.
+  ```python
+  def __gaussian_noise(self):
+    """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+    c = [.08, .12, 0.18, 0.26, 0.38][self.factor - 1]
+    x = np.array(self.image) / 255.
+    new_img= np.clip(x+(np.random.normal(size=x.shape, scale=c)), 0, 1) * 255
+    new_img=np.float32(new_img)
+    return (cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB))
+  ```
+3. **Impulse Noise**: This technique adds noise to the image by adding random isolated pixels with contrasting values to an image simulating the "salt and pepper" noise.
+```python
+def __speckle_noise(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [.15, .2, 0.35, 0.45, 0.6][self.factor - 1]
+  x = np.array(self.image) / 255.
+  return (cv2.cvtColor(np.float32(np.clip(x + x * np.random.normal(size=x.shape, scale=c), 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+
+4. **Speckle Noise**: Uses a uniform distribution to change the pixel values in the image to add noise.
+```python
+def __impulse_noise(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [.03, .06, .09, 0.17, 0.27][self.factor - 1]
+  x = sk.util.random_noise(np.array(self.image) / 255., mode='s&p', amount=c)
+  return (cv2.cvtColor(np.float32(np.clip(x, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+
+##### Blur Augmentation
+1. **Defocus Blur**: Uses channel-wise convolution to simulate the blurring effect of a camera lens when the subject is out of focus.
+```python
+def __defocus_blur(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [(3, 0.1), (4, 0.5), (6, 0.5), (8, 0.5), (10, 0.5)][self.factor - 1]
+  x = np.array(self.image) / 255.
+  kernel = self.disk(radius=c[0], alias_blur=c[1])
+
+  channels = []
+  for d in range(3):
+      channels.append(cv2.filter2D(x[:, :, d], -1, kernel))
+  channels = np.array(channels).transpose((1, 2, 0))  # 3x224x224 -> 224x224x3
+  return (cv2.cvtColor(np.float32(np.clip(channels, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+2. **Zoom Blur**: Uses clipping with a zoom factor to simulate the zoom blurring effect in cameras due to rapid camera motion towards the subject.
+```python
+def __zoom_blur(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [np.arange(1, 1.11, 0.01),
+        np.arange(1, 1.16, 0.01),
+        np.arange(1, 1.21, 0.02),
+        np.arange(1, 1.26, 0.02),
+        np.arange(1, 1.31, 0.03)][self.factor - 1]
+  x = (np.array(self.image) / 255.).astype(np.float32)
+  out = np.zeros_like(x)
+  for zoom_factor in c:
+      temp = self.__clipped_zoom(x, zoom_factor)
+      out += temp
+
+
+  x = (x + out) / (len(c) + 1)
+  return (cv2.cvtColor(np.float32(np.clip(x, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+3. **Glass Blur**: Uses a Gaussian filter to simulate the apperance of an object when viewed through a frosted glass.
+```python
+def __glass_blur(self):
+  c = [(0.7, 1, 2), (0.9, 2, 1), (1, 2, 3), (1.1, 3, 2), (1.5, 4, 2)][self.factor - 1]
+  x = np.uint8(gaussian(np.array(self.image) / 255., sigma=c[0], channel_axis=-1) * 255)
+
+  # locally shuffle pixels
+  for i in range(c[2]):
+      for h in range(x.shape[0] - c[1], c[1], -1):
+          for w in range(x.shape[1] - c[1], c[1], -1):
+              dx, dy = np.random.randint(-c[1], c[1], size=(2,))
+              h_prime, w_prime = h + dy, w + dx
+              # swap
+              x[h, w], x[h_prime, w_prime] = x[h_prime, w_prime], x[h, w]
+
+  return (cv2.cvtColor(np.float32(np.clip(gaussian(x / 255., sigma=c[0], channel_axis=-1), 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+
+##### Attribute Transformations
+1. **Brightness Transform**: Converts the image from RGB to HSV and then adjusts the value channel.
+```python
+def __brightness_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [.1, .2, .3, .4, .5][self.factor - 1]
+  x = np.array(self.image) / 255.
+  x = sk.color.rgb2hsv(x)
+  x[:, :, 2] = np.clip(x[:, :, 2] + c, 0, 1)
+  x = sk.color.hsv2rgb(x)
+  return (cv2.cvtColor(np.float32(np.clip(x, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+2. **Contrast Transform**: Clamped output of a linear transformation of the image using the mean pixel intensity gives a contrast transform.
+```python
+def __contrast_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [0.4, .3, .2, .1, .05][self.factor - 1]
+  x = np.array(self.image) / 255.
+  means = np.mean(x, axis=(0, 1), keepdims=True)
+  return (cv2.cvtColor(np.float32(np.clip((x - means) * c + means, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+3. **Saturation Transform**: Implementation converts the image from RGB to HSV and then adjusts the saturation channel.
+```python
+def __saturation_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [(0.3, 0), (0.1, 0), (2, 0), (5, 0.1), (20, 0.2)][self.factor - 1]
+  x = np.array(self.image) / 255.
+  x = sk.color.rgb2hsv(x)  
+  x[:, :, 1] = np.clip(x[:, :, 1] * c[0] + c[1], 0, 1)
+  x = sk.color.hsv2rgb(x)
+  return (cv2.cvtColor(np.float32(np.clip(x, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+
+##### Physical Transformations
+1. **Elastic Transform**: Simulates the effect of stretching or wrapping the image. 
+```python
+def __elastic_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [(244 * 2, 244 * 0.7, 244 * 0.1),   # 244 should have been 224, but ultimately nothing is incorrect
+        (244 * 2, 244 * 0.08, 244 * 0.2),
+        (244 * 0.05, 244 * 0.01, 244 * 0.02),
+        (244 * 0.07, 244 * 0.01, 244 * 0.02),
+        (244 * 0.12, 244 * 0.01, 244 * 0.02)][self.factor - 1]
+
+  image = np.array(self.image, dtype=np.float32) / 255.
+  shape = image.shape
+  shape_size = shape[:2]
+
+  # random affine
+  center_square = np.float32(shape_size) // 2
+  square_size = min(shape_size) // 3
+  pts1 = np.float32([center_square + square_size,
+                      [center_square[0] + square_size, center_square[1] - square_size],
+                      center_square - square_size])
+  pts2 = pts1 + np.random.uniform(-c[2], c[2], size=pts1.shape).astype(np.float32)
+  M = cv2.getAffineTransform(pts1, pts2)
+  image = cv2.warpAffine(image, M, shape_size[::-1], borderMode=cv2.BORDER_REFLECT_101)
+
+  dx = (gaussian(np.random.uniform(-1, 1, size=shape[:2]),
+                  c[1], mode='reflect', truncate=3) * c[0]).astype(np.float32)
+  dy = (gaussian(np.random.uniform(-1, 1, size=shape[:2]),
+                  c[1], mode='reflect', truncate=3) * c[0]).astype(np.float32)
+  dx, dy = dx[..., np.newaxis], dy[..., np.newaxis]
+
+  x, y, z = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]), np.arange(shape[2]))
+  indices = np.reshape(y + dy, (-1, 1)), np.reshape(x + dx, (-1, 1)), np.reshape(z, (-1, 1))
+  return (cv2.cvtColor(np.float32(np.clip(map_coordinates(image, indices, order=1, mode='reflect').reshape(shape), 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+2. **Splatter Transform**: Simulates the effect of splattering paint or any other liquid on the image.
+```python
+def __spatter_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [(0.65, 0.3, 4, 0.69, 0.6, 0),
+        (0.65, 0.3, 3, 0.68, 0.6, 0),
+        (0.65, 0.3, 2, 0.68, 0.5, 0),
+        (0.65, 0.3, 1, 0.65, 1.5, 1),
+        (0.67, 0.4, 1, 0.65, 1.5, 1)][self.factor - 1]
+  x = np.array(self.image, dtype=np.float32) / 255.
+
+  liquid_layer = np.random.normal(size=x.shape[:2], loc=c[0], scale=c[1])
+
+  liquid_layer = gaussian(liquid_layer, sigma=c[2])
+  liquid_layer[liquid_layer < c[3]] = 0
+  if c[5] == 0:
+      liquid_layer = (liquid_layer * 255).astype(np.uint8)
+      dist = 255 - cv2.Canny(liquid_layer, 50, 150)
+      dist = cv2.distanceTransform(dist, cv2.DIST_L2, 5)
+      _, dist = cv2.threshold(dist, 20, 20, cv2.THRESH_TRUNC)
+      dist = cv2.blur(dist, (3, 3)).astype(np.uint8)
+      dist = cv2.equalizeHist(dist)
+      ker = np.array([[-2, -1, 0], [-1, 1, 1], [0, 1, 2]])
+      dist = cv2.filter2D(dist, cv2.CV_8U, ker)
+      dist = cv2.blur(dist, (3, 3)).astype(np.float32)
+
+      m = cv2.cvtColor(liquid_layer * dist, cv2.COLOR_GRAY2BGRA)
+      m /= np.max(m, axis=(0, 1))
+      m *= c[4]
+
+      # water is pale turqouise
+      color = np.concatenate((175 / 255. * np.ones_like(m[..., :1]),
+                              238 / 255. * np.ones_like(m[..., :1]),
+                              238 / 255. * np.ones_like(m[..., :1])), axis=2)
+
+      color = cv2.cvtColor(color, cv2.COLOR_BGR2BGRA)
+      x = cv2.cvtColor(x, cv2.COLOR_BGR2BGRA)
+
+      return (cv2.cvtColor(np.clip(x + m * color, 0, 1), cv2.COLOR_BGRA2RGB) * 255)
+  else:
+      m = np.where(liquid_layer > c[3], 1, 0)
+      m = gaussian(m.astype(np.float32), sigma=c[4])
+      m[m < 0.8] = 0
+
+      # mud brown
+      color = np.concatenate((63 / 255. * np.ones_like(x[..., :1]),
+                              42 / 255. * np.ones_like(x[..., :1]),
+                              20 / 255. * np.ones_like(x[..., :1])), axis=2)
+
+      color *= m[..., np.newaxis]
+      x *= (1 - m[..., np.newaxis])
+
+      return (cv2.cvtColor(np.float32(np.clip(x + color, 0, 1) * 255), cv2.COLOR_BGR2RGB))
+```
+
+##### Digital Transformations
+1. **Pixel Transform**: Using downsampling and upsampling using bilinear interpolation, we are able to simulate a mosaic-like appearance.
+```python
+def __pixelate_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [0.6, 0.5, 0.4, 0.3, 0.15][self.factor - 1]
+  x = np.array(self.image)
+  # x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
+  width = int(x.shape[1] * c)
+  height = int(x.shape[0] * c)
+  dim = (width, height)
+  resized = cv2.resize(x, dim, interpolation = cv2.INTER_AREA)
+  return (cv2.cvtColor(np.float32(resized), cv2.COLOR_BGR2RGB))
+```
+2. **JPEG Compression**: Simulates the effect of JPEG compression loss on the image.
+```python
+def __jpeg_compression_transform(self):
+  """Credits: https://github.com/ishmamt/VQA-Visual-Robustness-Benchmark/blob/master/generator.py"""
+  c = [25, 18, 15, 10, 7][self.factor - 1]
+  x = np.array(self.image)
+  cv2.imwrite("temp.jpg", x, [int(cv2.IMWRITE_JPEG_QUALITY), c]) 
+  temp = imread("temp.jpg")
+  return temp
+```
+
+> Note: Due to computational constraints, each dataset we use contains a random sample of 20 questions from the original dataset. Also, all the transforms have a severity factor that ranges from 1 to 5. We will be testing the models on each of the factors.
+
+
+### Wu-Palmer Similarity
+VQA tasks often involve semantically close answers. For instance:  
+- Predicted answer: *“car”*  
+- Ground-truth answer: *“vehicle”*.  
+
+Exact-match scoring would return incorrect here, but WPS, derived from the WordNet lexical hierarchy, scores based on the **semantic distance** between terms.  
+
+### **Technical Details**
+WPS is calculated as:  
 $$
-\text{WUP}(a,b) = \max_{x \in S(a), y \in S(b)} \text{wupsimilarity}(x,y)
+\text{WPS}(x, y) = \frac{2 \cdot \text{Depth}(LCS(x, y))}{\text{Depth}(x) + \text{Depth}(y)}
 $$
-
-where $S(a), S(b)$ are sets of synsets for $a, b$.
+where:
+- \( LCS(x, y) \): Lowest Common Subsumer of \( x \) and \( y \) in the WordNet tree.
+- Depth: Distance from the root node in the WordNet hierarchy.
 
 ## Basic Implementation of VLM
 
@@ -324,6 +615,17 @@ We began with a simple open-answer VQA framework and introduced advanced models 
 ---
 
 ## References
+<a href="goyal2017"></a>[1] Goyal, Yash, et al. “Making the v in VQA Matter: Elevating the Role of Image Understanding in Visual Question Answering.” Computer Vision and Pattern Recognition, 1 July 2017, https://doi.org/10.1109/cvpr.2017.670. Accessed 21 Apr. 2023.
+
+<a href="marino2019"></a>[2] Marino, Kenneth, et al. “OK-VQA: A Visual Question Answering Benchmark Requiring External Knowledge.” ArXiv (Cornell University), 1 June 2019, https://doi.org/10.1109/cvpr.2019.00331. Accessed 11 Nov. 2023.
+
+<a href="wang2024"></a>[3] Wang, Ke, et al. “Measuring Multimodal Mathematical Reasoning with MATH-Vision Dataset.” ArXiv (Cornell University), 22 Feb. 2024, https://doi.org/10.48550/arxiv.2402.14804.
+
+<a href="ishmam2024"></a>[4] Farhan, Ishmam Md, et al. “Visual Robustness Benchmark for Visual Question Answering (VQA).” ArXiv (Cornell University), 3 July 2024, https://doi.org/10.48550/arxiv.2407.03386. Accessed 13 Dec. 2024.
+
+<a href="laurencon2024"></a>[5] Laurençon, Hugo, et al. “Building and Better Understanding Vision-Language Models: Insights and Future Directions.” ArXiv (Cornell University), 22 Aug. 2024, https://doi.org/10.48550/arxiv.2408.12637. Accessed 13 Dec. 2024.
+
+<a href="liu2023"></a>[6] Liu, Haotian, et al. “Visual Instruction Tuning.” ArXiv.org, 17 Apr. 2023, arxiv.org/abs/2304.08485.
 - Antol, S. et al. (2015). "VQA: Visual Question Answering." *ICCV*.
 - Teney, D. et al. (2018). "Tips and Tricks for Visual Question Answering." *CVPR*.
 - Hudson, D. & Manning, C.D. (2019). "GQA: A New Dataset for Real-World Visual Reasoning." *CVPR*.
